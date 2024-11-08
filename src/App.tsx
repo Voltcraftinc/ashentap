@@ -13,7 +13,6 @@ import SoulIcon from './images/soul.png';
 import DarkliteIcon from './images/darklite.png';
 import PanelOverlay from './images/paneloverlay.png';
 
-// Importing cinder images directly
 import echoOfTheAncientsImg from './images/cinders/echo_of_the_ancients.png';
 import moonboundSigilImg from './images/cinders/moonbound_sigil.png';
 import wardensCrossImg from './images/cinders/wardens_cross.png';
@@ -36,7 +35,17 @@ const App = () => {
   const [clicks, setClicks] = useState<{ id: number, x: number, y: number }[]>([]);
   const [overlayVisible, setOverlayVisible] = useState<string | null>(null);
   const [darklitePerHour, setDarklitePerHour] = useState(0);
-  const [darklitePerTap] = useState(10000); // Removed unused setDarklitePerTap
+  const [darklitePerTap] = useState(10000);
+
+  useEffect(() => {
+    // Disable right-click context menu globally
+    const handleContextMenu = (e: MouseEvent) => e.preventDefault();
+    window.addEventListener("contextmenu", handleContextMenu);
+
+    return () => {
+      window.removeEventListener("contextmenu", handleContextMenu);
+    };
+  }, []);
 
   const itemsInitialState = [
     {
@@ -207,12 +216,12 @@ const App = () => {
   ];
 
   const [items, setItems] = useState(itemsInitialState);
-  const energyToReduce = 12; // Removed unused pointsToAdd
+  const energyToReduce = 12;
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    if (energy - energyToReduce < 0) {
-      return;
-    }
+    e.preventDefault(); // Prevents any default actions like dragging or text selection
+    if (energy - energyToReduce < 0) return;
+
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
@@ -233,13 +242,23 @@ const App = () => {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && overlayVisible) {
+        setOverlayVisible(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [overlayVisible]);
+
   const toggleOverlay = (overlay: string | null) => {
     setOverlayVisible(overlay);
   };
 
   const purchaseItem = (itemId: number) => {
-    const levelUpCostIncrement = 1.25; // 25% cost increase per level
-    const darkliteIncrement = 1.05;    // 5% Darklite increase per level
+    const levelUpCostIncrement = 1.25;
+    const darkliteIncrement = 1.05;
 
     setItems((prevItems) =>
       prevItems.map((item) => {
@@ -270,30 +289,31 @@ const App = () => {
     if (overlayVisible === 'Cinders') {
       return (
         <div className="overlay-scroll-container overlay-scroll">
-          <div className="inside-box">
-            {items.map((item) => (
-              <div key={item.id} className="item-box">
-                <div className="item-info">
-                  <div className="name">{item.name}</div>
-                  {item.owned && <div className="owned-box">OWNED</div>}
-                  <div className="level">Level: {item.level}</div>
-                  <div className="description">{item.description}</div>
-                  <div className="earnings">
-                    Earnings: {(item.darklitePerHour * (item.level || 1)).toFixed(2)} Darklite/hour
-                  </div>
-                  <button
-                    className="purchase-button"
-                    onClick={() => purchaseItem(item.id)}
-                  >
-                    {item.owned
-                      ? `Level Up for ${item.cost} Darklite`
-                      : `Purchase for ${item.cost} Darklite`}
-                  </button>
-                </div>
-                <img src={item.image} className="cinder-image" alt={item.name} />
-              </div>
-            ))}
-          </div>
+<div className="inside-box">
+  {items.map((item) => (
+    <div key={item.id} className="item-box unselectable"> {/* Apply unselectable here */}
+      <div className="item-info">
+        <div className="name unselectable">{item.name}</div> {/* Prevent selection on name */}
+        {item.owned && <div className="owned-box unselectable">OWNED</div>}
+        <div className="level unselectable">Level: {item.level}</div>
+        <div className="description unselectable">{item.description}</div>
+        <div className="earnings unselectable">
+          Earnings: {(item.darklitePerHour * (item.level || 1)).toFixed(2)} Darklite/hour
+        </div>
+        <button
+          className="purchase-button unselectable"
+          onClick={() => purchaseItem(item.id)}
+        >
+          {item.owned
+            ? `Level Up for ${item.cost} Darklite`
+            : `Purchase for ${item.cost} Darklite`}
+        </button>
+      </div>
+      <img src={item.image} className="cinder-image unselectable" alt={item.name} />
+    </div>
+  ))}
+</div>
+
         </div>
       );
     }
@@ -345,7 +365,12 @@ const App = () => {
             </div>
           </div>
 
-          <div className="ashen-orb-container" onClick={handleClick}>
+          <div
+            className="ashen-orb-container"
+            onClick={handleClick}
+            onMouseDown={handleClick}
+            onContextMenu={(e) => e.preventDefault()} // Prevent context menu on right-click
+          >
             <img src={AshenOrb} width={550} height={550} alt="Ashen Orb" />
             {clicks.map((click) => (
               <div
