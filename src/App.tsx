@@ -28,9 +28,7 @@ import vanguardsBroochImg from './images/cinders/vanguards_brooch.png';
 import aegisOfVigilanceImg from './images/cinders/aegis_of_vigilance.png';
 import hammerOfTheResoluteImg from './images/cinders/hammer_of_the_resolute.png';
 import ramsResolveImg from './images/cinders/rams_resolve.png';
-import heartOfValorImg from './images/cinders/heart_of_valor.png'; 
-
-
+import heartOfValorImg from './images/cinders/heart_of_valor.png';
 
 const App = () => {
   const [points, setPoints] = useState(0);
@@ -38,7 +36,7 @@ const App = () => {
   const [clicks, setClicks] = useState<{ id: number, x: number, y: number }[]>([]);
   const [overlayVisible, setOverlayVisible] = useState<string | null>(null);
   const [darklitePerHour, setDarklitePerHour] = useState(0);
-  const [darklitePerTap, setDarklitePerTap] = useState(10000);
+  const [darklitePerTap] = useState(10000); // Removed unused setDarklitePerTap
 
   const itemsInitialState = [
     {
@@ -209,9 +207,7 @@ const App = () => {
   ];
 
   const [items, setItems] = useState(itemsInitialState);
-
-  const pointsToAdd = 12;
-  const energyToReduce = 12;
+  const energyToReduce = 12; // Removed unused pointsToAdd
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     if (energy - energyToReduce < 0) {
@@ -222,19 +218,18 @@ const App = () => {
     const y = e.clientY - rect.top;
 
     setPoints(points + darklitePerTap);
-    setEnergy(energy - energyToReduce < 0 ? 0 : energy - energyToReduce);
+    setEnergy((prevEnergy) => Math.max(prevEnergy - energyToReduce, 0));
     setClicks([...clicks, { id: Date.now(), x, y }]);
   };
 
   const handleAnimationEnd = (id: number) => {
-    setClicks((prevClicks) => prevClicks.filter(click => click.id !== id));
+    setClicks((prevClicks) => prevClicks.filter((click) => click.id !== id));
   };
 
   useEffect(() => {
     const interval = setInterval(() => {
       setEnergy((prevEnergy) => Math.min(prevEnergy + 1, 2500));
     }, 100);
-
     return () => clearInterval(interval);
   }, []);
 
@@ -243,24 +238,18 @@ const App = () => {
   };
 
   const purchaseItem = (itemId: number) => {
-    const levelUpCostIncrement = 1.50; // <-- Adjust this value to change the cost increment percentage (1.25 for 25%, 1.05 for 5%, etc.)
-    const darkliteIncrement = 1.05;     // <-- Adjust this value to change the Darklite per hour increment percentage (1.05 for 5%, 1.10 for 10%, etc.)
+    const levelUpCostIncrement = 1.25; // 25% cost increase per level
+    const darkliteIncrement = 1.05;    // 5% Darklite increase per level
 
-    setItems(prevItems =>
-      prevItems.map(item => {
+    setItems((prevItems) =>
+      prevItems.map((item) => {
         if (item.id === itemId && points >= item.cost) {
           const newLevel = item.level + 1;
-
-          // Update cost with a 25% increase per level
           const newCost = Math.round(item.baseCost * Math.pow(levelUpCostIncrement, newLevel));
-
-          // Update Darklite per hour with a 5% increase per level
           const newDarklitePerHour = item.darklitePerHour * Math.pow(darkliteIncrement, newLevel - 1);
 
           setPoints(points - item.cost);
-
-          // Update global Darklite per hour by adding only the new incremented Darklite for this level
-          setDarklitePerHour(prevDarklite => 
+          setDarklitePerHour((prevDarklite) =>
             prevDarklite + (newDarklitePerHour - item.darklitePerHour * Math.pow(darkliteIncrement, item.level - 1))
           );
 
@@ -275,15 +264,14 @@ const App = () => {
         return item;
       })
     );
-};
+  };
 
-
-const getOverlayContent = () => {
+  const getOverlayContent = () => {
     if (overlayVisible === 'Cinders') {
       return (
         <div className="overlay-scroll-container overlay-scroll">
           <div className="inside-box">
-            {items.map(item => (
+            {items.map((item) => (
               <div key={item.id} className="item-box">
                 <div className="item-info">
                   <div className="name">{item.name}</div>
