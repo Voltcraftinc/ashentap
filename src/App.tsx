@@ -347,7 +347,7 @@ const App = () => {
       const designHeight = 1920;
       const scaleWidth = window.innerWidth / designWidth;
       const scaleHeight = window.innerHeight / designHeight;
-      const autoScaleFactor = Math.min(scaleWidth, scaleHeight) * scaleFactor; // Adjust based on state
+      const autoScaleFactor = Math.min(scaleWidth, scaleHeight) * scaleFactor;
   
       document.documentElement.style.setProperty('--scale-factor', autoScaleFactor.toString());
     };
@@ -356,7 +356,9 @@ const App = () => {
     updateScale(); // Initial scale on load
   
     return () => window.removeEventListener('resize', updateScale);
-  }, [scaleFactor]); // Depend on scaleFactor to re-trigger on slider change
+  }, [scaleFactor]);
+
+  
   
   
   useEffect(() => {
@@ -366,15 +368,16 @@ const App = () => {
       const scaleWidth = window.innerWidth / designWidth;
       const scaleHeight = window.innerHeight / designHeight;
       const scaleFactor = Math.min(scaleWidth, scaleHeight);
-  
+
       document.documentElement.style.setProperty('--scale-factor', scaleFactor.toString());
     };
-  
+
     window.addEventListener('resize', updateScale);
     updateScale(); // Initial scale on load
-  
+
     return () => window.removeEventListener('resize', updateScale);
-  }, []);
+}, []);
+
   
   return (
     <div className="scalable-wrapper">

@@ -57,12 +57,11 @@ img {
 }
 
 :root {
-  --scale-factor: 1;
+  --scale-factor: 1; /* Default scale factor */
 }
 
 .scalable-wrapper {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   width: 100vw;
@@ -72,11 +71,37 @@ img {
 }
 
 .fixed-container {
-  width: 1080px;
-  height: 1920px;
+  width: 1080px; /* Design width */
+  height: 1920px; /* Design height */
+  max-width: 100%;
+  max-height: 100%;
   transform: scale(var(--scale-factor));
   transform-origin: center center;
 }
+
+/* Constrain inner elements to avoid stretching */
+
+.points-display,
+.icon-row,
+.energy-bar {
+  max-width: 80%; /* Limits width to prevent stretching */
+  margin: 0 auto; /* Center align within the fixed container */
+}
+
+.scale-control {
+  max-width: 80%; /* Prevents scale control from stretching across */
+  margin: 0 auto;
+}
+
+/* Additional adjustment for icons */
+.icon-row .icon-button {
+  flex-shrink: 1;
+  max-width: 20%; /* Adjust as necessary to fit icons comfortably */
+}
+
+
+
+
 
 
 
