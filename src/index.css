@@ -16,15 +16,15 @@ body {
   min-height: 100vh; /* Minimum height for the main container */
 }
 
-/* Floating animation for tap effects */
-@keyframes float {
-  0% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-50px);
-  }
+.darklite-fly-icon {
+  width: 24px;
+  height: 24px;
+  animation: float 1s ease-out;
 }
 
+@keyframes fly-to-target {
+  to {
+    transform: translate(-50%, -150%);
+    opacity: 0;
+  }
+}

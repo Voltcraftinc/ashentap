@@ -5,11 +5,10 @@
   font-style: normal;
 }
 
-/* Prevent text selection */
+
 .unselectable {
   user-select: none;
 }
-
 
 #root {
   margin: 0 auto;
@@ -25,26 +24,21 @@ body, html {
   overflow: hidden;
 }
 
-/* Apply to body to make everything non-selectable */
 body, html, .fixed-container, .main-container {
   user-select: none;
 }
 
-/* Prevent text selection globally */
 * {
   user-select: none;
 }
 
-/* Alternative: disable pointer events for images */
 img {
   pointer-events: none;
 }
 
-
-/* Flying Darklite icon */
 .flying-darklite {
   position: absolute;
-  width: 32px; /* Adjust size as needed */
+  width: 32px;
   height: 32px;
   transition: transform 1s ease-out, opacity 1s ease-out;
   pointer-events: none;
@@ -62,18 +56,29 @@ img {
   }
 }
 
+:root {
+  --scale-factor: 1;
+}
 
+.scalable-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-color: black;
+}
 
 .fixed-container {
-  position: absolute;
   width: 1080px;
   height: 1920px;
-  background-color: black;
-  overflow: hidden;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  transform: scale(var(--scale-factor));
+  transform-origin: center center;
 }
+
+
 
 @media (max-aspect-ratio: 1080/1920) {
   .fixed-container {
@@ -235,36 +240,31 @@ img {
 .name {
   font-size: 2em;
   font-weight: bold;
-  width: 80%; /* Adjust width to desired value */
-  text-align: left; /* Center-align the text within the width */
-  line-height: 1.1; /* Adjust this value to control line spacing */
+  width: 80%;
+  text-align: left;
+  line-height: 1.1;
 }
-
 
 .level {
   font-size: 1.2rem;
   font-weight: bold;
-  width: 80%; /* Adjust width to desired value */
-  text-align: left; /* Center-align the text within the width */
-  
+  width: 80%;
+  text-align: left;
 }
 
 .description {
   font-size: 1rem;
   font-weight: none;
-  width: 80%; /* Adjust width to desired value */
-  text-align: left; /* Center-align the text within the width */
-
+  width: 80%;
+  text-align: left;
 }
 
 .earnings {
   font-size: 1rem;
   font-weight: bold;
-  width: 80%; /* Adjust width to desired value */
-  text-align: left; /* Center-align the text within the width */
-
+  width: 80%;
+  text-align: left;
 }
-
 
 .purchase-button {
   background-color: #4caf50;
@@ -291,6 +291,44 @@ img {
 }
 
 .cinder-image {
-  width: 60px; /* Set desired width here */
+  width: 60px;
   height: auto;
+}
+
+.darklite-fly-icon {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  animation: fly-to-target 1.5s ease-out forwards, fadeOut 1.5s ease-out;
+}
+
+@keyframes fly-to-target {
+  100% {
+    transform: translate(var(--target-x), var(--target-y));
+    opacity: 0.5;
+  }
+}
+
+@keyframes fadeOut {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+
+/* Scale control styling */
+.scale-control {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: white;
+  z-index: 50; /* Ensures the slider is on top */
+}
+
+
+.scale-control input[type="range"] {
+  width: 200px;
 }

@@ -13,6 +13,15 @@ import SoulIcon from './images/soul.png';
 import DarkliteIcon from './images/darklite.png';
 import PanelOverlay from './images/paneloverlay.png';
 
+//////////////////////////////////////////////////////////
+import { CSSProperties } from 'react';
+
+interface FlyIconStyle extends CSSProperties {
+  '--target-x'?: string;
+  '--target-y'?: string;
+}
+//////////////////////////////////////////////////////////
+
 import echoOfTheAncientsImg from './images/cinders/echo_of_the_ancients.png';
 import moonboundSigilImg from './images/cinders/moonbound_sigil.png';
 import wardensCrossImg from './images/cinders/wardens_cross.png';
@@ -29,23 +38,23 @@ import hammerOfTheResoluteImg from './images/cinders/hammer_of_the_resolute.png'
 import ramsResolveImg from './images/cinders/rams_resolve.png';
 import heartOfValorImg from './images/cinders/heart_of_valor.png';
 
+interface Click {
+  id: number;
+  x: number;
+  y: number;
+  targetX: number;
+  targetY: number;
+}
+
 const App = () => {
   const [points, setPoints] = useState(0);
   const [energy, setEnergy] = useState(2532);
-  const [clicks, setClicks] = useState<{ id: number, x: number, y: number }[]>([]);
+  const [clicks, setClicks] = useState<Click[]>([]);
   const [overlayVisible, setOverlayVisible] = useState<string | null>(null);
   const [darklitePerHour, setDarklitePerHour] = useState(0);
   const [darklitePerTap] = useState(10000);
+  const [scaleFactor, setScaleFactor] = useState(1); // New state for manual scaling
 
-  useEffect(() => {
-    // Disable right-click context menu globally
-    const handleContextMenu = (e: MouseEvent) => e.preventDefault();
-    window.addEventListener("contextmenu", handleContextMenu);
-
-    return () => {
-      window.removeEventListener("contextmenu", handleContextMenu);
-    };
-  }, []);
 
   const itemsInitialState = [
     {
@@ -218,17 +227,32 @@ const App = () => {
   const [items, setItems] = useState(itemsInitialState);
   const energyToReduce = 12;
 
+  useEffect(() => {
+    // Disable right-click context menu globally
+    const handleContextMenu = (e: MouseEvent) => e.preventDefault();
+    window.addEventListener("contextmenu", handleContextMenu);
+
+    return () => {
+      window.removeEventListener("contextmenu", handleContextMenu);
+    };
+  }, []);
+
   const handleClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    e.preventDefault(); // Prevents any default actions like dragging or text selection
+    e.preventDefault();
     if (energy - energyToReduce < 0) return;
 
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
+    const darkliteIcon = document.querySelector('.darklite-amount-icon') as HTMLDivElement;
+    const targetRect = darkliteIcon.getBoundingClientRect();
+    const targetX = targetRect.left - rect.left + targetRect.width / 2;
+    const targetY = targetRect.top - rect.top + targetRect.height / 2;
+
     setPoints(points + darklitePerTap);
     setEnergy((prevEnergy) => Math.max(prevEnergy - energyToReduce, 0));
-    setClicks([...clicks, { id: Date.now(), x, y }]);
+    setClicks([...clicks, { id: Date.now(), x, y, targetX, targetY }]);
   };
 
   const handleAnimationEnd = (id: number) => {
@@ -257,7 +281,7 @@ const App = () => {
   };
 
   const purchaseItem = (itemId: number) => {
-    const levelUpCostIncrement = 1.25;
+    const levelUpCostIncrement = 2;
     const darkliteIncrement = 1.05;
 
     setItems((prevItems) =>
@@ -289,123 +313,183 @@ const App = () => {
     if (overlayVisible === 'Cinders') {
       return (
         <div className="overlay-scroll-container overlay-scroll">
-<div className="inside-box">
-  {items.map((item) => (
-    <div key={item.id} className="item-box unselectable"> {/* Apply unselectable here */}
-      <div className="item-info">
-        <div className="name unselectable">{item.name}</div> {/* Prevent selection on name */}
-        {item.owned && <div className="owned-box unselectable">OWNED</div>}
-        <div className="level unselectable">Level: {item.level}</div>
-        <div className="description unselectable">{item.description}</div>
-        <div className="earnings unselectable">
-          Earnings: {(item.darklitePerHour * (item.level || 1)).toFixed(2)} Darklite/hour
-        </div>
-        <button
-          className="purchase-button unselectable"
-          onClick={() => purchaseItem(item.id)}
-        >
-          {item.owned
-            ? `Level Up for ${item.cost} Darklite`
-            : `Purchase for ${item.cost} Darklite`}
-        </button>
-      </div>
-      <img src={item.image} className="cinder-image unselectable" alt={item.name} />
-    </div>
-  ))}
-</div>
-
+          <div className="inside-box">
+            {items.map((item) => (
+              <div key={item.id} className="item-box unselectable">
+                <div className="item-info">
+                  <div className="name unselectable">{item.name}</div>
+                  {item.owned && <div className="owned-box unselectable">OWNED</div>}
+                  <div className="level unselectable">Level: {item.level}</div>
+                  <div className="description unselectable">{item.description}</div>
+                  <div className="earnings unselectable">
+                    Earnings: {(item.darklitePerHour * (item.level || 1)).toFixed(2)} Darklite/hour
+                  </div>
+                  <button
+                    className="purchase-button unselectable"
+                    onClick={() => purchaseItem(item.id)}
+                  >
+                    {item.owned ? `Level Up for ${item.cost} Darklite` : `Purchase for ${item.cost} Darklite`}
+                  </button>
+                </div>
+                <img src={item.image} className="cinder-image unselectable" alt={item.name} />
+              </div>
+            ))}
+          </div>
         </div>
       );
     }
     return <div className="overlay-scroll-container overlay-scroll"><p>No items available.</p></div>;
   };
 
+  useEffect(() => {
+    const updateScale = () => {
+      const designWidth = 1080;
+      const designHeight = 1920;
+      const scaleWidth = window.innerWidth / designWidth;
+      const scaleHeight = window.innerHeight / designHeight;
+      const autoScaleFactor = Math.min(scaleWidth, scaleHeight) * scaleFactor; // Adjust based on state
+  
+      document.documentElement.style.setProperty('--scale-factor', autoScaleFactor.toString());
+    };
+  
+    window.addEventListener('resize', updateScale);
+    updateScale(); // Initial scale on load
+  
+    return () => window.removeEventListener('resize', updateScale);
+  }, [scaleFactor]); // Depend on scaleFactor to re-trigger on slider change
+  
+  
+  useEffect(() => {
+    const updateScale = () => {
+      const designWidth = 1080;
+      const designHeight = 1920;
+      const scaleWidth = window.innerWidth / designWidth;
+      const scaleHeight = window.innerHeight / designHeight;
+      const scaleFactor = Math.min(scaleWidth, scaleHeight);
+  
+      document.documentElement.style.setProperty('--scale-factor', scaleFactor.toString());
+    };
+  
+    window.addEventListener('resize', updateScale);
+    updateScale(); // Initial scale on load
+  
+    return () => window.removeEventListener('resize', updateScale);
+  }, []);
+  
   return (
-    <div className="fixed-container">
-      <div className="main-container min-h-screen px-4 flex flex-col items-center text-white font-medium">
-        <div className="w-full z-10 min-h-screen flex flex-col items-center text-white">
-          <div className="logo-container mt-6">
-            <img src={AshenTapLogo} width={500} height={150} alt="AshenTap Logo" />
+    <div className="scalable-wrapper">
+      <div className="fixed-container">
+        <div className="main-container min-h-screen px-4 flex flex-col items-center text-white font-medium">
+          {/* Your game content here */}
+          <div className="w-full z-10 min-h-screen flex flex-col items-center text-white">
+            <div className="logo-container mt-6">
+              <img src={AshenTapLogo} width={500} height={150} alt="AshenTap Logo" />
+            </div>
+  
+            <div className="points-display">
+              <div className="flex justify-center space-x-8 mt-4">
+                <div className="bg-[#1f1f1f] text-center py-2 px-4 rounded-xl flex items-center space-x-2">
+                  <img src={DarkliteIcon} className="currency-icon darklite-amount-icon" alt="Darklite Icon" />
+                  <span>{darklitePerHour.toFixed(2)} Darklite/hour</span>
+                </div>
+                <div className="bg-[#1f1f1f] text-center py-2 px-4 rounded-xl">
+                  <span>{darklitePerTap} Darklite per Tap</span>
+                </div>
+              </div>
+              <div className="mt-4 text-5xl font-bold flex items-center">
+                <img src={DarkliteIcon} className="currency-icon darklite-amount-icon" alt="Darklite" />
+                <span className="ml-2">{points.toLocaleString()}</span>
+              </div>
+              <div className="text-base mt-2 flex items-center">
+                <img src={trophy} width={24} height={24} />
+                <span className="ml-1">Gold <Arrow size={18} className="ml-0 mb-1 inline-block" /></span>
+              </div>
+            </div>
+  
+            <div className="fixed bottom-12 left-0 w-full px-4 pb-4 z-10 flex justify-between items-center">
+              <div className="flex items-center">
+                <img src={SoulIcon} className="energy-icon scalable-icon" alt="Soul Icon" />
+                <div className="ml-2 text-left">
+                  <span className="text-white text-2xl font-bold block">{energy}</span>
+                  <span className="text-white opacity-75">/ 2500</span>
+                </div>
+              </div>
+  
+              <div className="icon-row">
+                <button className="icon-button" onClick={() => toggleOverlay('Cinders')}>
+                  <img src={CindersIcon} className="scalable-icon" alt="Cinders" />
+                </button>
+                <button className="icon-button" onClick={() => toggleOverlay('Covenant')}>
+                  <img src={CovenantIcon} className="scalable-icon" alt="Covenant" />
+                </button>
+                <button className="icon-button" onClick={() => toggleOverlay('Boost')}>
+                  <img src={BoostIcon} className="scalable-icon" alt="Boost" />
+                </button>
+                <button className="icon-button" onClick={() => toggleOverlay('Leaderboard')}>
+                  <img src={LeaderboardIcon} className="scalable-icon" alt="Leaderboard" />
+                </button>
+              </div>
+            </div>
+  
+            <div
+              className="ashen-orb-container"
+              onClick={handleClick}
+              onMouseDown={handleClick}
+              onContextMenu={(e) => e.preventDefault()}
+            >
+              <img src={AshenOrb} width={550} height={550} alt="Ashen Orb" />
+              {clicks.map((click) => (
+                <img
+                  key={click.id}
+                  src={DarkliteIcon}
+                  className="absolute darklite-fly-icon"
+                  style={{
+                    top: `${click.y}px`,
+                    left: `${click.x}px`,
+                    '--target-x': `${click.targetX - click.x}px`,
+                    '--target-y': `${click.targetY - click.y}px`,
+                  } as FlyIconStyle}
+                  onAnimationEnd={() => handleAnimationEnd(click.id)}
+                  alt="Darklite Icon"
+                />
+              ))}
+            </div>
           </div>
-
-          <div className="points-display">
-            <div className="flex justify-center space-x-8 mt-4">
-              <div className="bg-[#1f1f1f] text-center py-2 px-4 rounded-xl flex items-center space-x-2">
-                <img src={DarkliteIcon} className="currency-icon" alt="Darklite Icon" />
-                <span>{darklitePerHour.toFixed(2)} Darklite/hour</span>
-              </div>
-              <div className="bg-[#1f1f1f] text-center py-2 px-4 rounded-xl">
-                <span>{darklitePerTap} Darklite per Tap</span>
-              </div>
+  
+          {overlayVisible && (
+            <div className="overlay">
+              <img src={PanelOverlay} alt="Overlay Background" className="overlay-image" />
+              <button className="close-button" onClick={() => toggleOverlay(null)}>CLOSE</button>
+              {getOverlayContent()}
             </div>
-            <div className="mt-4 text-5xl font-bold flex items-center">
-              <img src={DarkliteIcon} className="currency-icon" alt="Darklite" />
-              <span className="ml-2">{points.toLocaleString()}</span>
-            </div>
-            <div className="text-base mt-2 flex items-center">
-              <img src={trophy} width={24} height={24} />
-              <span className="ml-1">Gold <Arrow size={18} className="ml-0 mb-1 inline-block" /></span>
-            </div>
-          </div>
-
-          <div className="fixed bottom-12 left-0 w-full px-4 pb-4 z-10 flex justify-between items-center">
-            <div className="flex items-center">
-              <img src={SoulIcon} className="energy-icon scalable-icon" alt="Soul Icon" />
-              <div className="ml-2 text-left">
-                <span className="text-white text-2xl font-bold block">{energy}</span>
-                <span className="text-white opacity-75">/ 2500</span>
-              </div>
-            </div>
-
-            <div className="icon-row">
-              <button className="icon-button" onClick={() => toggleOverlay('Cinders')}><img src={CindersIcon} className="scalable-icon" alt="Cinders" /></button>
-              <button className="icon-button" onClick={() => toggleOverlay('Covenant')}><img src={CovenantIcon} className="scalable-icon" alt="Covenant" /></button>
-              <button className="icon-button" onClick={() => toggleOverlay('Boost')}><img src={BoostIcon} className="scalable-icon" alt="Boost" /></button>
-              <button className="icon-button" onClick={() => toggleOverlay('Leaderboard')}><img src={LeaderboardIcon} className="scalable-icon" alt="Leaderboard" /></button>
-            </div>
-          </div>
-
-          <div
-            className="ashen-orb-container"
-            onClick={handleClick}
-            onMouseDown={handleClick}
-            onContextMenu={(e) => e.preventDefault()} // Prevent context menu on right-click
-          >
-            <img src={AshenOrb} width={550} height={550} alt="Ashen Orb" />
-            {clicks.map((click) => (
-              <div
-                key={click.id}
-                className="absolute text-5xl font-bold opacity-0"
-                style={{
-                  top: `${click.y - 42}px`,
-                  left: `${click.x - 28}px`,
-                  animation: `float 1s ease-out`
-                }}
-                onAnimationEnd={() => handleAnimationEnd(click.id)}
-              >
-                {darklitePerTap}
-              </div>
-            ))}
+          )}
+  
+          <div className="fixed bottom-0 w-full bg-[#f9c035] rounded-full">
+            <div
+              className="bg-gradient-to-r from-[#f3c45a] to-[#fffad0] h-4 rounded-full"
+              style={{ width: `${(energy / 2500) * 100}%` }}
+            ></div>
           </div>
         </div>
 
-        {overlayVisible && (
-          <div className="overlay">
-            <img src={PanelOverlay} alt="Overlay Background" className="overlay-image" />
-            <button className="close-button" onClick={() => toggleOverlay(null)}>CLOSE</button>
-            {getOverlayContent()}
-          </div>
-        )}
-
-        <div className="fixed bottom-0 w-full bg-[#f9c035] rounded-full">
-          <div
-            className="bg-gradient-to-r from-[#f3c45a] to-[#fffad0] h-4 rounded-full"
-            style={{ width: `${(energy / 2500) * 100}%` }}
-          ></div>
-        </div>
+      {/* Scale Control UI */}
+      <div className="scale-control">
+        <label htmlFor="scaleRange">Scale:</label>
+        <input
+          id="scaleRange"
+          type="range"
+          min="0.5"
+          max="2"
+          step="0.1"
+          value={scaleFactor}
+          onChange={(e) => setScaleFactor(parseFloat(e.target.value))}
+        />
       </div>
     </div>
-  );
+  </div>
+);
+  
+  
 };
 
 export default App;
