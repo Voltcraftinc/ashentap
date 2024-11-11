@@ -53,8 +53,7 @@ const App = () => {
   const [overlayVisible, setOverlayVisible] = useState<string | null>(null);
   const [darklitePerHour, setDarklitePerHour] = useState(0);
   const [darklitePerTap] = useState(10000);
-  const [scaleFactor, setScaleFactor] = useState(1); // New state for manual scaling
-
+  const [scaleFactor, setScaleFactor] = useState(1); // State for manual scaling
 
   const itemsInitialState = [
     {
@@ -228,7 +227,6 @@ const App = () => {
   const energyToReduce = 12;
 
   useEffect(() => {
-    // Disable right-click context menu globally
     const handleContextMenu = (e: MouseEvent) => e.preventDefault();
     window.addEventListener("contextmenu", handleContextMenu);
 
@@ -358,37 +356,15 @@ const App = () => {
     return () => window.removeEventListener('resize', updateScale);
   }, [scaleFactor]);
 
-  
-  
-  
-  useEffect(() => {
-    const updateScale = () => {
-      const designWidth = 1080;
-      const designHeight = 1920;
-      const scaleWidth = window.innerWidth / designWidth;
-      const scaleHeight = window.innerHeight / designHeight;
-      const scaleFactor = Math.min(scaleWidth, scaleHeight);
-
-      document.documentElement.style.setProperty('--scale-factor', scaleFactor.toString());
-    };
-
-    window.addEventListener('resize', updateScale);
-    updateScale(); // Initial scale on load
-
-    return () => window.removeEventListener('resize', updateScale);
-}, []);
-
-  
   return (
     <div className="scalable-wrapper">
       <div className="fixed-container">
         <div className="main-container min-h-screen px-4 flex flex-col items-center text-white font-medium">
-          {/* Your game content here */}
           <div className="w-full z-10 min-h-screen flex flex-col items-center text-white">
             <div className="logo-container mt-6">
               <img src={AshenTapLogo} width={500} height={150} alt="AshenTap Logo" />
             </div>
-  
+
             <div className="points-display">
               <div className="flex justify-center space-x-8 mt-4">
                 <div className="bg-[#1f1f1f] text-center py-2 px-4 rounded-xl flex items-center space-x-2">
@@ -408,7 +384,7 @@ const App = () => {
                 <span className="ml-1">Gold <Arrow size={18} className="ml-0 mb-1 inline-block" /></span>
               </div>
             </div>
-  
+
             <div className="fixed bottom-12 left-0 w-full px-4 pb-4 z-10 flex justify-between items-center">
               <div className="flex items-center">
                 <img src={SoulIcon} className="energy-icon scalable-icon" alt="Soul Icon" />
@@ -417,7 +393,7 @@ const App = () => {
                   <span className="text-white opacity-75">/ 2500</span>
                 </div>
               </div>
-  
+
               <div className="icon-row">
                 <button className="icon-button" onClick={() => toggleOverlay('Cinders')}>
                   <img src={CindersIcon} className="scalable-icon" alt="Cinders" />
@@ -433,7 +409,7 @@ const App = () => {
                 </button>
               </div>
             </div>
-  
+
             <div
               className="ashen-orb-container"
               onClick={handleClick}
@@ -458,7 +434,7 @@ const App = () => {
               ))}
             </div>
           </div>
-  
+
           {overlayVisible && (
             <div className="overlay">
               <img src={PanelOverlay} alt="Overlay Background" className="overlay-image" />
@@ -466,7 +442,7 @@ const App = () => {
               {getOverlayContent()}
             </div>
           )}
-  
+
           <div className="fixed bottom-0 w-full bg-[#f9c035] rounded-full">
             <div
               className="bg-gradient-to-r from-[#f3c45a] to-[#fffad0] h-4 rounded-full"
@@ -475,24 +451,22 @@ const App = () => {
           </div>
         </div>
 
-      {/* Scale Control UI */}
-      <div className="scale-control">
-        <label htmlFor="scaleRange">Scale:</label>
-        <input
-          id="scaleRange"
-          type="range"
-          min="0.5"
-          max="2"
-          step="0.1"
-          value={scaleFactor}
-          onChange={(e) => setScaleFactor(parseFloat(e.target.value))}
-        />
+        {/* Scale Control UI */}
+        <div className="scale-control">
+          <label htmlFor="scaleRange">Scale:</label>
+          <input
+            id="scaleRange"
+            type="range"
+            min="0.5"
+            max="2"
+            step="0.1"
+            value={scaleFactor}
+            onChange={(e) => setScaleFactor(parseFloat(e.target.value))}
+          />
+        </div>
       </div>
     </div>
-  </div>
-);
-  
-  
+  );
 };
 
 export default App;
