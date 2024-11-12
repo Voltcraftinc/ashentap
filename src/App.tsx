@@ -339,23 +339,23 @@ const App = () => {
     return <div className="overlay-scroll-container overlay-scroll"><p>No items available.</p></div>;
   };
 
-  useEffect(() => {
-    const updateScale = () => {
-      const designWidth = 1080;
-      const designHeight = 1920;
-      const scaleWidth = window.innerWidth / designWidth;
-      const scaleHeight = window.innerHeight / designHeight;
-      const autoScaleFactor = Math.min(scaleWidth, scaleHeight);
-  
-      document.documentElement.style.setProperty('--scale-factor', autoScaleFactor.toString());
-    };
-  
-    window.addEventListener('resize', updateScale);
-    updateScale(); // Initial scale on load
-  
-    return () => window.removeEventListener('resize', updateScale);
-  }, []);
-  
+useEffect(() => {
+  const updateScale = () => {
+    const designWidth = 1080;
+    const designHeight = 1920;
+    const scaleWidth = window.innerWidth / designWidth;
+    const scaleHeight = window.innerHeight / designHeight;
+    const autoScaleFactor = Math.min(scaleWidth, scaleHeight);
+
+    document.documentElement.style.setProperty('--scale-factor', autoScaleFactor.toString());
+  };
+
+  window.addEventListener('resize', updateScale);
+  updateScale(); // Initial scale on load
+
+  return () => window.removeEventListener('resize', updateScale);
+}, []);
+
 
   return (
     <div className="scalable-wrapper">

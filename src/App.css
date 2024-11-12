@@ -15,7 +15,7 @@ body, html {
   margin: 0;
   padding: 0;
   overflow: hidden;
-  height: 100%;
+  height: 100%; /* Ensure body fills the full height */
 }
 
 * {
@@ -30,141 +30,91 @@ img {
   --scale-factor: 1;
 }
 
-/* Main container covers full viewport */
-.scalable-wrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
-  background-color: black;
-}
 
-.fixed-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 100vw;
-  height: 100vh;
-  max-width: 100%;
-  max-height: 100%;
-  overflow: hidden;
-  padding: 1rem;
-}
 
-/* Main game content styling */
-.main-container {
+/* Scale control styling */
+.scale-control {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
-  flex-direction: column;
   align-items: center;
-  text-align: center;
-  font-family: 'OptimusPrinceps', sans-serif;
+  gap: 0.5rem;
   color: white;
+  z-index: 50;
 }
 
-.logo-container img {
-  width: 35vw; /* Adjusted to scale logo */
-  max-width: 350px;
-  height: auto;
+.scale-control input[type="range"] {
+  width: 200px;
 }
 
-.points-display {
-  display: flex;
-  justify-content: space-around;
-  width: 80%;
-  max-width: 500px;
-  gap: 1rem;
+
+/* Constrain inner elements to avoid stretching */
+.points-display,
+.icon-row,
+.energy-bar {
+  max-width: 80%; /* Limits width to prevent stretching */
+  margin: 0 auto; /* Center align within the fixed container */
 }
 
-.points-display div {
-  background: #1f1f1f;
-  padding: 0.5rem 1rem;
-  border-radius: 10px;
-  font-size: 1rem;
-  color: white;
-  white-space: nowrap;
+.scale-control {
+  max-width: 80%; /* Prevents scale control from stretching across */
+  margin: 0 auto;
 }
 
-.currency-icon, .darklite-amount-icon {
-  width: 1.5em;
-  height: auto;
-  margin-right: 0.3rem;
+/* Additional adjustment for icons */
+.icon-row .icon-button {
+  flex-shrink: 1;
+  max-width: 20%; /* Adjust as necessary to fit icons comfortably */
 }
 
-/* Center points display text on a single line */
-.points-display span {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
+.ashen-orb-container {
+  margin-top: 2rem;
+  position: relative;
 }
 
-.energy-icon, .scalable-icon {
-  width: 6vw;
-  height: auto;
-}
-
-/* Icon row adjustments */
 .icon-row {
   display: flex;
   justify-content: space-around;
   align-items: center;
+  gap: 0.5rem;
   width: 80%;
-  margin-top: 2vh;
-  gap: 2vw;
+  max-width: 700px;
+  position: relative;
+  margin-top: 1rem;
 }
 
-.icon-button img {
-  width: 8vw;
+.icon-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  padding: 0;
+  color: white;
+  flex-shrink: 0;
+}
+
+.scalable-icon {
+  width: 6em;
   height: auto;
   transition: transform 0.2s ease;
 }
 
-.icon-button:hover img {
+.icon-button:hover .scalable-icon {
   transform: scale(1.1);
 }
 
-/* Centered orb container */
-.ashen-orb-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 60vw;
+.energy-icon {
+  width: 2.5em;
+}
+
+.currency-icon {
+  width: 2.5em;
   height: auto;
-  position: relative;
-  margin-top: 3vh;
 }
 
-/* Large point display */
-.points-display .darklite-amount-icon {
-  width: 3vw;
-  height: auto;
-  margin-right: 0.5rem;
-}
-
-/* Adjusted font sizes for 160,000 text */
-.points-display .points-value {
-  font-size: 4vw; /* Scale with viewport */
-  color: white;
-}
-
-/* Fly animation */
-.darklite-fly-icon {
-  position: absolute;
-  width: 5vw;
-  height: 5vw;
-  animation: fly-to-target 1.5s ease-out forwards, fadeOut 1.5s ease-out;
-}
-
-@keyframes fly-to-target {
-  100% {
-    transform: translate(var(--target-x), var(--target-y));
-    opacity: 0.5;
-  }
-}
-
-/* Overlay styling */
 .overlay {
   position: fixed;
   top: 0;
@@ -180,7 +130,7 @@ img {
 
 .overlay-image {
   width: 80%;
-  max-width: 700px;
+  max-width: 900px;
   position: relative;
 }
 
@@ -262,22 +212,33 @@ img {
   margin-left: 10px;
 }
 
-.name, .level, .description, .earnings {
-  text-align: left;
-}
-
 .name {
-  font-size: 1.8rem;
+  font-size: 2em;
   font-weight: bold;
+  width: 80%;
+  text-align: left;
+  line-height: 1.1;
 }
 
-.level, .earnings {
-  font-size: 1rem;
+.level {
+  font-size: 1.2rem;
   font-weight: bold;
+  width: 80%;
+  text-align: left;
 }
 
 .description {
   font-size: 1rem;
+  font-weight: none;
+  width: 80%;
+  text-align: left;
+}
+
+.earnings {
+  font-size: 1rem;
+  font-weight: bold;
+  width: 80%;
+  text-align: left;
 }
 
 .purchase-button {
@@ -307,4 +268,40 @@ img {
 .cinder-image {
   width: 60px;
   height: auto;
+}
+
+.darklite-fly-icon {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  animation: fly-to-target 1.5s ease-out forwards, fadeOut 1.5s ease-out;
+}
+
+@keyframes fly-to-target {
+  100% {
+    transform: translate(var(--target-x), var(--target-y));
+    opacity: 0.5;
+  }
+}
+
+@keyframes fadeOut {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Scale control styling */
+.scale-control {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: white;
+  z-index: 50; /* Ensures the slider is on top */
+}
+
+.scale-control input[type="range"] {
+  width: 200px;
 }
