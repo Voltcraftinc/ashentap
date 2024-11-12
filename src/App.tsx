@@ -53,7 +53,7 @@ const App = () => {
   const [overlayVisible, setOverlayVisible] = useState<string | null>(null);
   const [darklitePerHour, setDarklitePerHour] = useState(0);
   const [darklitePerTap] = useState(10000);
-  const [scaleFactor, setScaleFactor] = useState(1); // State for manual scaling
+//  const [scaleFactor, setScaleFactor] = useState(1); // State for manual scaling
 
   const itemsInitialState = [
     {
@@ -345,7 +345,7 @@ const App = () => {
       const designHeight = 1920;
       const scaleWidth = window.innerWidth / designWidth;
       const scaleHeight = window.innerHeight / designHeight;
-      const autoScaleFactor = Math.min(scaleWidth, scaleHeight) * scaleFactor;
+      const autoScaleFactor = Math.min(scaleWidth, scaleHeight);
   
       document.documentElement.style.setProperty('--scale-factor', autoScaleFactor.toString());
     };
@@ -354,7 +354,8 @@ const App = () => {
     updateScale(); // Initial scale on load
   
     return () => window.removeEventListener('resize', updateScale);
-  }, [scaleFactor]);
+  }, []);
+  
 
   return (
     <div className="scalable-wrapper">
@@ -451,19 +452,6 @@ const App = () => {
           </div>
         </div>
 
-        {/* Scale Control UI */}
-        <div className="scale-control">
-          <label htmlFor="scaleRange">Scale:</label>
-          <input
-            id="scaleRange"
-            type="range"
-            min="0.5"
-            max="2"
-            step="0.1"
-            value={scaleFactor}
-            onChange={(e) => setScaleFactor(parseFloat(e.target.value))}
-          />
-        </div>
       </div>
     </div>
   );
